@@ -1,65 +1,77 @@
-local aiming = false -- whether or not aim assist is currently enabled
-local aimButton = script.Parent -- the UI button that toggles aim assist
+--// Settings //--
+local aimbotEnabled = true
+local aimRadius = 50 -- the radius of the circle used to find targets
+local lockOnTime = 0.2 -- the time in seconds to wait before locking on to a target
+local aimColor = Color3.fromRGB(255, 255, 0) -- the color of the aim assist circle
 
--- function to enable aim assist
-local function enableAimAssist()
-    aiming = true
-    aimButton.Text = "Disable Aim Assist"
-end
+--// Variables //--
+local player = game:GetService("Players").LocalPlayer
+local inputService = game:GetService("UserInputService")
+local runService = game:GetService("RunService")
 
--- function to disable aim assist
-local function disableAimAssist()
-    aiming = false
-    aimButton.Text = "Enable Aim Assist"
-end
+local aimGui = Instance.new("ScreenGui")
+aimGui.Name = "AimGui"
+aimGui.Parent = game.CoreGui
 
--- connect the button to the enable/disable functions
-aimButton.Activated:Connect(function()
-    if aiming then
-        disableAimAssist()
-    else
-        enableAimAssist()
+local aimCircle = Instance.new("ImageLabel")
+aimCircle.Name = "AimCircle"
+aimCircle.AnchorPoint = Vector2.new(0.5, 0.5)
+aimCircle.BackgroundTransparency = 1
+aimCircle.Image = "rbxassetid://5574609988"
+aimCircle.ImageColor3 = aimColor
+aimCircle.Position = UDim2.new(0.5, 0, 0.5, 0)
+aimCircle.Size = UDim2.new(0, aimRadius * 2, 0, aimRadius * 2)
+aimCircle.Visible = false
+aimCircle.Parent = aimGui
+
+local aimLock = false
+local aimTarget = nil
+local aimTime = 0
+
+--// Functions //--
+local function getNearestTarget()
+    local nearestDist = math.huge
+    local nearestTarget = nil
+    for _, npc in pairs(game.Workspace.NPCs:GetChildren()) do
+        if npc:FindFirstChild("HumanoidRootPart") and npc:FindFirstChild("Humanoid") and npc.Humanoid.Health > 0 then
+            local targetPos, onScreen = workspace.CurrentCamera:WorldToViewportPoint(npc.HumanoidRootPart.Position)
+            local dist = (Vector2.new(targetPos.X, targetPos.Y) - Vector2.new(inputService:GetMouseLocation().X, inputService:GetMouseLocation().Y)).magnitude
+            if onScreen and dist < aimRadius and dist < nearestDist then
+                nearestDist = dist
+                nearestTarget = npc.HumanoidRootPart
+            end
+        end
     end
-end)
+    return nearestTarget
+end
 
--- main loop to update aim assist
-while true do
-    wait(0.1) -- adjust this value to control how frequently the aim is updated
-    
-    if aiming then
-        local player = game.Players.LocalPlayer
-        local character = player.Character
-        local mouse = player:GetMouse()
-        local target
-        
-        -- detect if the player is targeting an NPC or another player
-        local hit = mouse.Hit
-        local hitPart = hit and hit.Instance and hit.Instance.Parent
-        if hitPart and hitPart:IsA("Model") then
-            if hitPart:FindFirstChild("Humanoid") then
-                -- targeting an NPC
-                target = hitPart
+--// Main Loop //--
+runService.RenderStepped:Connect(function()
+    if aimbotEnabled then
+        if aimLock then
+            if aimTarget and aimTarget.Parent and aimTarget.Parent.Humanoid.Health > 0 then
+                aimCircle.Position = UDim2.new(0, aimTarget.Position.X - workspace.CurrentCamera.ViewportSize.X / 2, 0, aimTarget.Position.Y - workspace.CurrentCamera.ViewportSize.Y / 2)
+                aimCircle.Visible = true
+            else
+                aimLock = false
+                aimTarget = nil
+                aimCircle.Visible = false
             end
         else
-            -- targeting a player
-            local targetCharacter = workspace:FindFirstChild(hitPart.Name)
-            if targetCharacter and targetCharacter ~= character then
-                target = targetCharacter
+            local nearestTarget = getNearestTarget()
+            if nearestTarget then
+                aimTime = tick()
+            end
+            if tick() - aimTime >= lockOnTime then
+                aimLock = true
+                aimTarget = nearestTarget
+                aimTime = 0
             end
         end
-        
-        -- lock on to the target if one is found
-        if target then
-            local targetPart = target:FindFirstChild("HumanoidRootPart")
-            if targetPart then
-                -- aim at the target
-                local direction = (targetPart.Position - character.HumanoidRootPart.Position).unit
-                character.HumanoidRootPart.CFrame = CFrame.new(character.HumanoidRootPart.Position, targetPart.Position) * CFrame.new(0, 0, -10)
-                
-                -- lock on to the target
-                character.Humanoid:ChangeState(Enum.HumanoidStateType.Swimming)
-                character.Humanoid:ChangeState(Enum.HumanoidStateType.Physics)
-            end
-        end
+    else
+        aimLock = false
+        aimTarget = nil
+        aimTime = 0
+        aimCircle.Visible = false
     end
-end
+end)
