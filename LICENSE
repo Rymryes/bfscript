@@ -1,24 +1,60 @@
-This is free and unencumbered software released into the public domain.
+-- Configuration
+local aimAssistDistance = 20 -- adjust this value to control the distance at which aim assist is active
 
-Anyone is free to copy, modify, publish, use, compile, sell, or
-distribute this software, either in source code form or as a compiled
-binary, for any purpose, commercial or non-commercial, and by any
-means.
+-- Create the button
+local button = Instance.new("TextButton")
+button.Text = "Open"
+button.Size = UDim2.new(0, 100, 0, 50)
+button.Position = UDim2.new(0, 10, 0, 10)
+button.BackgroundTransparency = 0.5
+button.Parent = game.Players.LocalPlayer.PlayerGui
 
-In jurisdictions that recognize copyright laws, the author or authors
-of this software dedicate any and all copyright interest in the
-software to the public domain. We make this dedication for the benefit
-of the public at large and to the detriment of our heirs and
-successors. We intend this dedication to be an overt act of
-relinquishment in perpetuity of all present and future rights to this
-software under copyright law.
+-- Create the aim assist function
+local function aimAssist()
+    -- Get the player's camera and character
+    local camera = game.Workspace.CurrentCamera
+    local character = game.Players.LocalPlayer.Character
+    if not camera or not character then
+        return
+    end
+    
+    -- Get the closest NPC or player within the aim assist distance
+    local closestObject, closestDistance
+    for _, object in ipairs(game.Workspace:GetChildren()) do
+        if object:IsA("Model") and (object.Name == "NPC" or object:IsDescendantOf(game.Players)) then
+            local distance = (object.PrimaryPart.Position - camera.CFrame.Position).magnitude
+            if distance <= aimAssistDistance and (not closestDistance or distance < closestDistance) then
+                closestObject = object
+                closestDistance = distance
+            end
+        end
+    end
+    
+    -- Aim at the closest NPC or player
+    if closestObject then
+        local target = closestObject.PrimaryPart.Position
+        local targetScreenPos = camera:WorldToScreenPoint(target)
+        local screenSize = game:GetService("GuiService"):GetScreenResolution()
+        local aimPos = Vector2.new(targetScreenPos.X, targetScreenPos.Y)
+        local aimCenter = screenSize / 2
+        local aimDelta = (aimPos - aimCenter) / screenSize
+        character.Humanoid.AutoRotate = false
+        character.HumanoidRootPart.CFrame = CFrame.new(camera.CFrame.Position, camera.CFrame.Position + (camera.CFrame.LookVector + Vector3.new(aimDelta.x, 0, aimDelta.y)).unit * 1000)
+    else
+        character.Humanoid.AutoRotate = true
+    end
+end
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR
-OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
-ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
-OTHER DEALINGS IN THE SOFTWARE.
-
-For more information, please refer to <https://unlicense.org>
+-- Hook up the button
+local isOpen = false
+button.MouseButton1Click:Connect(function()
+    isOpen = not isOpen
+    button.Text = isOpen and "Off" or "Open"
+    if isOpen then
+        button.BackgroundColor3 = Color3.new(0, 1, 0)
+        aimAssistConnection = game:GetService("RunService").Heartbeat:Connect(aimAssist)
+    else
+        button.BackgroundColor3 = Color3.new(1, 0, 0)
+        aimAssistConnection:Disconnect()
+    end
+end)
