@@ -1,24 +1,37 @@
-repeat wait() until game:IsLoaded()
-Fruits = {
-"Human: Buddha Fruit",
-"Bird: Phoenix Fruit",
-"Rumble Fruit",
-"Paw Fruit",
-"Gravity Fruit",
-"Dough Fruit",
-"Control Fruit",
-"Venom Fruit",
-"Shadow Fruit",
-"Dragon Fruit" ,
-"Soul Fruit",
-"Leopard Fruit"
-}
-
-Valuable = {"Dough Fruit","Shadow Fruit","Venom Fruit","Control Fruit","Dragon Fruit","Soul Fruit","Leopard Fruit"} ------ it will stop the script if you got this fruit
-Webhook = "" --------------------------------Optional
-Store = true  --------------------------------Auto Store after it got the fruit
-Safeplace = true ----------------------------- Safeplace 
-Repeat = true --------------------------------- Repeat continues hopping
-WaitTime = 10 ---------------------------------------------------- Set time how much time does the script execute higher number means slow but will not bug out For Synapse only 
------------------------------------------------------------------------
-loadstring(game:HttpGet"https://gist.githubusercontent.com/NotHubris/4e6fdc88d84c30afa9b28c590f273bbf/raw")()
+local UIS = game:GetService("UserInputService")
+local AimbotEnabled = false
+local function GetClosestPlayer()
+    local Players = game:GetService("Players")
+    local LocalPlayer = Players.LocalPlayer
+    local ClosestMagnitude = math.huge
+    local ClosestPlayer = nil
+    for _, Player in pairs(Players:GetPlayers()) do
+        if Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") and Player ~= LocalPlayer and Player.Character:FindFirstChild("Humanoid") and Player.Character.Humanoid.Health > 0 then
+            local Magnitude = (Player.Character.HumanoidRootPart.Position - LocalPlayer.Character.HumanoidRootPart.Position).magnitude
+            if Magnitude < ClosestMagnitude then
+                ClosestMagnitude = Magnitude
+                ClosestPlayer = Player
+            end
+        end
+    end
+    return ClosestPlayer
+end
+UIS.InputBegan:Connect(function(Input)
+    if Input.UserInputType == Enum.UserInputType.Touch and Input.UserInputState == Enum.UserInputState.Begin then
+        AimbotEnabled = not AimbotEnabled
+        if AimbotEnabled then
+            while AimbotEnabled do
+                wait()
+                local ClosestPlayer = GetClosestPlayer()
+                if ClosestPlayer then
+                    local Camera = workspace.CurrentCamera
+                    local CharPart = ClosestPlayer.Character.HumanoidRootPart
+                    local ScreenPos = Camera:WorldToViewportPoint(CharPart.Position)
+                    if ScreenPos.Z > 0 and ScreenPos.X > 0 and ScreenPos.X < Camera.ViewportSize.X and ScreenPos.Y > 0 and ScreenPos.Y < Camera.ViewportSize.Y then
+                        UIS:SendTouchInput(1, ScreenPos.X, ScreenPos.Y, 0, false, Input.UserInputType)
+                    end
+                end
+            end
+        end
+    end
+end)
