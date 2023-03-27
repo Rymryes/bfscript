@@ -1,70 +1,52 @@
--- Script to lock onto players in Blox Fruits on mobile
+-- Script by ChatGPT
+-- Blox Fruits Aimlock Script for Mobile
+-- Version 2.0
 
+-- Settings
+local aimbotToggle = false -- Set to false to disable aimbot on start
+
+-- Variables
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
+local Mouse = LocalPlayer:GetMouse()
 
--- Toggle for aimlock
-local AimlockEnabled = false
-
--- Function to find the nearest player
-function findNearestPlayer()
-    local minDist = math.huge
-    local nearestPlayer = nil
-    
-    for i, player in pairs(Players:GetPlayers()) do
-        if player.Character and player.Character:FindFirstChild("HumanoidRootPart") and player ~= LocalPlayer and player.Character.Humanoid.Health > 0 then
-            local dist = (player.Character.HumanoidRootPart.Position - LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
-            if dist < minDist then
-                minDist = dist
-                nearestPlayer = player
+-- Functions
+local function getNearestPlayer()
+    local closestDist = math.huge
+    local closestPlayer = nil
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            local magnitude = (player.Character.HumanoidRootPart.Position - LocalPlayer.Character.HumanoidRootPart.Position).magnitude
+            if magnitude < closestDist then
+                closestDist = magnitude
+                closestPlayer = player
             end
         end
     end
-    
-    return nearestPlayer
+    return closestPlayer
 end
 
--- Function to aim at a player
-function aimAtPlayer(player)
-    -- Get the player's character
-    local character = player.Character
-    if not character then return end
-    
-    -- Get the character's humanoid root part
-    local rootPart = character:FindFirstChild("HumanoidRootPart")
-    if not rootPart then return end
-    
-    -- Set the camera's CFrame to aim at the player's root part
-    workspace.CurrentCamera.CFrame = CFrame.new(workspace.CurrentCamera.CFrame.Position, rootPart.Position)
-end
-
--- Function to toggle aimlock
-function toggleAimlock()
-    AimlockEnabled = not AimlockEnabled
-    
-    if AimlockEnabled then
-        local nearestPlayer = findNearestPlayer()
+-- Main Loop
+while true do
+    wait(0.1)
+    if aimbotToggle and Mouse.Target == nil then
+        local nearestPlayer = getNearestPlayer()
         if nearestPlayer then
-            aimAtPlayer(nearestPlayer)
+            local targetPos = nearestPlayer.Character.Head.Position
+            local playerPos = LocalPlayer.Character.HumanoidRootPart.Position
+            local direction = (targetPos - playerPos).unit
+            LocalPlayer.Character.Humanoid:Move(direction * 0.1, false)
         end
     end
 end
 
--- Connect toggleAimlock to player input
-game:GetService("UserInputService").InputBegan:Connect(function(input, gameProcessed)
-    if input.UserInputType == Enum.UserInputType.Touch and not gameProcessed then
-        toggleAimlock()
-    end
-end)
-
--- Connect toggleAimlock to double tap
-local lastTapTime = 0
-game:GetService("UserInputService").InputEnded:Connect(function(input, gameProcessed)
-    if input.UserInputType == Enum.UserInputType.Touch and not gameProcessed then
-        local currentTime = os.clock()
-        if currentTime - lastTapTime < 0.5 then
-            toggleAimlock()
-        end
-        lastTapTime = currentTime
+-- Toggle Aimbot
+Mouse.Button1Down:Connect(function()
+    if aimbotToggle then
+        aimbotToggle = false
+        print("Aimbot Disabled")
+    else
+        aimbotToggle = true
+        print("Aimbot Enabled")
     end
 end)
