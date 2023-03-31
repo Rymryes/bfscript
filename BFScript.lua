@@ -33,8 +33,8 @@ game:GetService("Camera").FieldOfView = 70
 -- Set Anti-Aliasing to Off
 game:GetService("GraphicsSettings").AntiAliasingMode = Enum.AntiAliasingMode.Disabled
 
--- Set Render Distance to 200
-game:GetService("Workspace").MaxDistance = 200
+-- Set Render Distance to 500
+game:GetService("Workspace").MaxDistance = 500
 
 -- Reduce Ping and Lag
 game:GetService("NetworkClient"):SetOutgoingKBPSLimit(500)
