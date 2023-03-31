@@ -28,13 +28,13 @@ game:GetService("Camera").MotionBlur = false
 game:GetService("PostEffect").Vignette.Enabled = false
 
 -- Set FOV to 70
-game:GetService("Camera").FieldOfView = 70
+game:GetService("Camera").FieldOfView = 90
 
 -- Set Anti-Aliasing to Off
 game:GetService("GraphicsSettings").AntiAliasingMode = Enum.AntiAliasingMode.Disabled
 
 -- Set Render Distance to 500
-game:GetService("Workspace").MaxDistance = 500
+game:GetService("Workspace").MaxDistance = 1000
 
 -- Reduce Ping and Lag
 game:GetService("NetworkClient"):SetOutgoingKBPSLimit(500)
