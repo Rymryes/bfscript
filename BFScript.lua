@@ -1,72 +1,43 @@
--- Load Blox Fruits game
-game:GetService('Players').LocalPlayer:RequestStreamAroundAsync(Vector3.new(0, 0, 0))
+-- Blox Fruits FPS Boost Script for Mobile by Rymr
 
--- Unlock FPS
-game:GetService('RunService').RenderStepped:Connect(function()
-    game:GetService('RunService').RenderStepped:Fire()
-end)
+-- Set Graphics Quality to Low
+game:GetService("GraphicsSettings").QualityLevel = Enum.QualityLevel.Low
 
--- Find all fruits on the map
-local fruitTable = {
-    'Bomb',
-    'Spike',
-    'Chop',
-    'Spring',
-    'Kilo',
-    'Smoke',
-    'Spin',
-    'Flame',
-    'Falcon',
-    'Ice',
-    'Sand',
-    'Dark',
-    'Revive',
-    'Daimond',
-    'Light',
-    'Love',
-    'Rubber',
-    'Barrier',
-    'Magma',
-    'Door',
-    'Quake',
-    'Buddha',
-    'String',
-    'Phoenix',
-    'Rumble',
-    'Paw',
-    'Gravity',
-    'Dough',
-    'Shadow',
-    'Venom',
-    'Control',
-    'Soul',
-    'Dragon',
-    'Leopard'
-}
-local function findFruits()
-    for i, fruit in ipairs(fruitTable) do
-        local fruitModel = game:GetService('Workspace'):FindFirstChild(fruit)
-        if fruitModel then
-            local fruitPart = fruitModel:FindFirstChild('SpawnPart')
-            if fruitPart and fruitPart.Transparency ~= 1 then
-                local fruitName = fruitModel.Name
-                print('Found '..fruitName..'!')
-                repeat
-                    wait(1)
-                until not fruitPart or fruitPart.Transparency == 1
-                print(fruitName..' is no longer available.')
-            end
-        end
-    end
-end
-findFruits()
+-- Disable Shadows
+game.Lighting.GlobalShadows = false
 
--- Apply FPS booster
-local function setFpsCap(newCap)
-    for i,v in pairs(getreg()) do
-        if type(v) == "function" and debug.getinfo(v).name == "setfpscap" then
-            v(newCap)
-        end
-    end
-end
-setFpsCap(math.huge)
+-- Disable Reflections
+game.Lighting:SetReflectionsEnabled(false)
+
+-- Turn off Water Reflections
+game.Lighting.WaterReflections = false
+
+-- Reduce Particle Count
+game.Lighting.ParticleCount = 100
+
+-- Disable Ambient Occlusion
+game:GetService("Lighting").Technology.AmbientOcclusion = false
+
+-- Disable Depth of Field
+game:GetService("DepthOfField").Enabled = false
+
+-- Disable Motion Blur
+game:GetService("Camera").MotionBlur = false
+
+-- Disable Vignette
+game:GetService("PostEffect").Vignette.Enabled = false
+
+-- Set FOV to 70
+game:GetService("Camera").FieldOfView = 70
+
+-- Set Anti-Aliasing to Off
+game:GetService("GraphicsSettings").AntiAliasingMode = Enum.AntiAliasingMode.Disabled
+
+-- Set Render Distance to 200
+game:GetService("Workspace").MaxDistance = 200
+
+-- Reduce Ping and Lag
+game:GetService("NetworkClient"):SetOutgoingKBPSLimit(500)
+game:GetService("NetworkClient"):SetIncomingKBPSLimit(500)
+
+print("Script loaded pal.")
