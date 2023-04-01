@@ -68,4 +68,4 @@ for _, part in ipairs(game.Workspace:GetDescendants()) do
     end
 end
 
-print("Script loaded successfully.")
+print("Script loaded pal.")
