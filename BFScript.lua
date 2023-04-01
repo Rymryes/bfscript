@@ -1,4 +1,4 @@
--- Blox Fruits FPS Boost Script for Mobile by ChatGPT
+-- Blox Fruits FPS Boost Script for Mobile by Rymr
 
 -- Set Graphics Quality to Medium
 game:GetService("GraphicsSettings").QualityLevel = Enum.QualityLevel.Medium
