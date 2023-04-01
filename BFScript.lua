@@ -11,8 +11,8 @@ network:SetOutgoingPacketThrottleRate(10)
 network:SetIncomingPacketThrottleBurstSize(20)
 network:SetIncomingPacketThrottleRate(10)
 
--- Set Render Distance to 1000
-game:GetService("Workspace").MaxDistance = 1000
+-- Set Render Distance to 1500
+game:GetService("Workspace").MaxDistance = 1500
 
--- Set FOV to 80
-game:GetService("Camera").FieldOfView = 80
+-- Set FOV to 100
+game:GetService("Camera").FieldOfView = 100
